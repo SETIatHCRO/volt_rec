@@ -1,6 +1,6 @@
-CFLAGS= -Wall -g -lpthread
+CFLAGS= -Wall -g -pthread
 
-all: recorder test
+all: recorder 
 default: recorder
 
 common.o: common.c common.h

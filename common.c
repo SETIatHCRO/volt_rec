@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
+#include <string.h>
 
 extern volatile sig_atomic_t keep_going;
 
@@ -17,6 +18,7 @@ void error(char *message)
 
 int destroy_udpBuff(udpBuffStruct* structure)
 {
+    int iK;
     if(pthread_mutex_destroy(&structure->dataMutex)) error("mutexD");
     if(pthread_mutex_destroy(&structure->NReadyMutex)) error("mutexD");
     free(structure->orderNo);
@@ -24,15 +26,14 @@ int destroy_udpBuff(udpBuffStruct* structure)
     for(iK = 0; iK < structure->noBuffers; iK++)
     {
             free(structure->data[iK]);
-            free(structure->firstHeader[iK]);
     }
     free(structure->data);
-    free(structure->firstHeader);
     return 1;
 }
 
 int init_udpBuff(udpBuffStruct* structure, int number_of_buffers, ssize_t bufsize)
 {
+    int iK;
     if(pthread_mutex_init(&structure->dataMutex,NULL)) error("mutexI");
     if(pthread_mutex_init(&structure->NReadyMutex,NULL)) error("mutexI");
     if((structure->data = (char **)malloc(sizeof(char*)*number_of_buffers)) == NULL) error("malloc");
@@ -42,7 +43,6 @@ int init_udpBuff(udpBuffStruct* structure, int number_of_buffers, ssize_t bufsiz
     }
     if((structure->dataLen = (size_t *)malloc(sizeof(size_t)*number_of_buffers)) == NULL) error("malloc");
     if((structure->orderNo = (ssize_t *)malloc(sizeof(ssize_t)*number_of_buffers)) == NULL) error("malloc");
-    if((structure->lastPacketNo= (unsigned int *)malloc(sizeof(unsigned int)*number_of_buffers)) == NULL) error("malloc");
     memset(structure->orderNo,0,sizeof(ssize_t)*number_of_buffers);
     structure->NReady = 0;
     structure->noBuffers = number_of_buffers;
@@ -98,9 +98,9 @@ int fetchEmptyBuffer(udpBuffStruct* structure,char ** buff, ssize_t * index)
 int anyBufFull(udpBuffStruct structure)
 {
     int localNready;
-    if(pthread_mutex_lock(&structure->NReadyMutex)) error("lock");
-    localNready = structure->NReady++;
-    if(pthread_mutex_unlock(&structure->NReadyMutex)) error("unlock");
+    if(pthread_mutex_lock(&structure.NReadyMutex)) error("lock");
+    localNready = structure.NReady++;
+    if(pthread_mutex_unlock(&structure.NReadyMutex)) error("unlock");
     return localNready;
 }
 
@@ -148,6 +148,7 @@ int fetchBuffer(udpBuffStruct* structure, char **buff, ssize_t * index, ssize_t 
         }
         if(pthread_mutex_unlock(&structure->NReadyMutex)) error("unlock");
         nanosleep(&tt,NULL);
+    }
 
     if(pthread_mutex_lock(&structure->dataMutex)) error("lock");
     *index = findLowest(structure->orderNo,N_UDP_BUFFERS);

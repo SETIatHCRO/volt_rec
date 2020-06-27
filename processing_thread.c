@@ -21,9 +21,9 @@ void * worker_work(void * pointer)
         ssize_t next_order;
         size_t dataLen;
         size_t dataLenOut;
-        int msize;
         int no_missing,nOfPackets;
         int iK;
+        ssize_t order;
         work_local_struct localStruct[N_FILE_BUFFERS_AT_A_TIME];
         int first_loop_done = 0;
         uint64_t currHeader;
@@ -82,9 +82,9 @@ void * worker_work(void * pointer)
                         for(iK = 0; iK < nOfPackets; iK++)
                         {
                                 memcpy(&currHeader, input + iK*RX_MSG_LEN, sizeof(uint64_t));
-                                printf("Ant: %d chan: %d pkt: %d version: %d\n",GET_ANT_NO(currHeader),GET_CHAN_NO(currHeader),GET_PCKT_NO(currHeader),GET_VERSION_NO(currHeader));
+                                printf("Ant: %ld chan: %ld pkt: %ld version: %ld\n",GET_ANT_NO(currHeader),GET_CHAN_NO(currHeader),GET_PCKT_NO(currHeader),GET_VERSION_NO(currHeader));
                         }
-                        keep_going = false;
+                        keep_going = 0;
                 }
 
                 returnEmptyBuffer(data->udpBuff,indexIn);

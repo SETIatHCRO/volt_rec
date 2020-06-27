@@ -45,11 +45,9 @@ int main(int argc, char *argv[])
         pthread_t fileWriter;
         pthread_t worker;
 
-        int iK;
-
         if (argc < 2)
         {
-            printf("usage: %s port datadir nAnts nChans firstChan\n");
+            printf("usage: %s port datadir nAnts nChans firstChan\n",argv[0]);
             return -1;
         }
         if(argc >= 4)
