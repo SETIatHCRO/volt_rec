@@ -56,7 +56,7 @@ void * file_writer_work(void * pointer)
                 if((file_int = open(currFileName,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
                 //order should follow packet number 1:1. since we are creating new file
                 //we need to update the packet start information here.
-                data->fileBuff->packetStart = order + data->fileBuff->packetStart -1;
+                data->fileBuff->packetStart = order * TIME_INT_PER_BUFFER  + data->fileBuff->packetStart -1;
                 if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
             }
             else

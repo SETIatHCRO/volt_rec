@@ -164,3 +164,35 @@ int fetchBuffer(udpBuffStruct* structure, char **buff, ssize_t * index, ssize_t 
     if(pthread_mutex_unlock(&structure->dataMutex)) error("unlock");
     return 0;
 }
+
+int updateAntenna(uint32_t * antNumbers, uint32_t currAnt, uint32_t maxAnts)
+{
+    int iK;
+    for (iK = 0; iK < maxAnts; iK++)
+    {
+        if(antNumbers[iK] == currAnt)
+        {
+            return 0;
+        }
+        else if(antNumbers[iK] == -1)
+        {
+            antNumbers[iK] = currAnt;
+            return 1;
+        }
+    }
+    return -1;
+}
+
+int getAntIndex(uint32_t * antNumbers, uint32_t currAnt, uint32_t maxAnts)
+{
+    int iK;
+    for (iK = 0; iK < maxAnts; iK++)
+    {
+        if(antNumbers[iK] == currAnt)
+        {
+            return iK;
+        }
+    }
+    return -1;
+}
+

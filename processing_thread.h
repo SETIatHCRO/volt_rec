@@ -5,7 +5,7 @@
 
 typedef struct __work_local_struct
 {
-    uint32_t packetNo;
+    uint64_t packetNo;
     char * data;
     ssize_t index;
     ssize_t order;

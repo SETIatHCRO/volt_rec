@@ -15,6 +15,9 @@ int init_udpBuff(udpBuffStruct* structure, int number_of_buffers, ssize_t bufsiz
 int destroy_udpBuff(udpBuffStruct* structure);
 int anyBufFull(udpBuffStruct structure);
 
+int updateAntenna(uint32_t * antNumbers, uint32_t currAnt, uint32_t maxAnts);
+int getAntIndex(uint32_t * antNumbers, uint32_t currAnt, uint32_t maxAnts);
+
 #define ERR(source) {perror(source),\
                      fprintf(stderr,"%s:%d\n",__FILE__,__LINE__);\
                      printf("%s:%d\n",__FILE__,__LINE__);\

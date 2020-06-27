@@ -15,10 +15,15 @@
 #define N_FILE_BUFFERS_AT_A_TIME (10)
 //this should be RX_MSG_LEN * N_READS_DEFAULT
 #define UDP_BUFFER_SIZE (100000000)
-//this should be MAX_NO_ANTS * RX_DATA_LEN * MAX_CHANNEL_PACKETS
+//this should be MAX_NO_ANTS * RX_DATA_LEN * MAX_CHANNEL_PACKETS * TIME_INT_PER_BUFFER
 #define FILE_BUFFER_SIZE (100000000)
 
 #define MAX_ORDER_MISSES (9)
+
+//should be 2^n
+#define TIME_INT_PER_BUFFER 16
+#define GET_PACKET_FILTER(x) (x & ~(0x0f))
+#define GET_PACKET_REST(x) (x & 0x0f)
 
 #define RX_DATA_LEN (8192)
 #define RX_MSG_LEN (RX_DATA_LEN+8)
@@ -43,11 +48,17 @@
 #define PCKT_NO_MASK (0x03fffffffff)
 #define VERSION_NO_MASK (0x00ff)
 
-#define GET_ANT_NO(x) (x & ANT_NO_MASK)
+#define GET_ANT_NO(x) ((x) & ANT_NO_MASK)
 #define GET_CHAN_NO(x) ((x >> 6) & CHAN_NO_MASK)
 #define GET_PCKT_NO(x) ((x >> 18) & PCKT_NO_MASK)
 #define GET_VERSION_NO(x) ((x >> 56) & VERSION_NO_MASK)
 
+#ifndef MIN
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#endif
+#ifndef MAX
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#endif
 
 typedef struct __udpBuffStruct
 {
