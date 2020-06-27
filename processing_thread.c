@@ -144,7 +144,8 @@ void * worker_work(void * pointer)
                         //else we ignore that packet
                 }
                 returnEmptyBuffer(data->udpBuff,indexIn);
-                //sending all that are full
+                //sending all that are full, and all earlier. Also, if number of started buffers is all-1, we are sending those
+                int nStarted = 0;
                 for (iK = 0; iK < N_FILE_BUFFERS_AT_A_TIME; iK++)
                 {
                         //if buffer is full, we are sending it
@@ -160,6 +161,12 @@ void * worker_work(void * pointer)
                                 localStruct[iK].packetNo = nextStructPacketNo;
                                 nextStructPacketNo = (nextStructPacketNo + TIME_INT_PER_BUFFER) & PCKT_NO_MASK;
                         }
+                        else if (localStruct[iK].nToFull < packetsPerBlock)
+                        {
+                                nStarted++;
+                        }
+
+                        /*
                         //sending "too old" packets
                         //if we have "high" packet no and last setn was very low (e.g. last sent was 2 and we have MAX-10,
                         else if ( ( (lastSentPacketNo < N_FILE_BUFFERS_AT_A_TIME/2) && (localStruct[iK].packetNo < (PCKT_NO_MASK + lastSentPacketNo - N_FILE_BUFFERS_AT_A_TIME/2+1) ) && (localStruct[iK].packetNo > (PCKT_NO_MASK >> 1)) )
@@ -177,8 +184,30 @@ void * worker_work(void * pointer)
                                 //if we have all packets with missing data, we are enforcing that things move forward by adjusting this
                                 lastSentPacketNo = (nextStructPacketNo - TIME_INT_PER_BUFFER*N_FILE_BUFFERS_AT_A_TIME/4) & PCKT_NO_MASK;
                         }
+                        */
                 }
-
+                //if we have most started, we mark last sent as half of the buffer size
+                if (nStarted > N_FILE_BUFFERS_AT_A_TIME -2)
+                {
+                        lastSentPacketNo = (nextStructPacketNo - TIME_INT_PER_BUFFER*N_FILE_BUFFERS_AT_A_TIME/2) & PCKT_NO_MASK;
+                }
+                //now we are sending all "earlier" data
+                for (iK = 0; iK < N_FILE_BUFFERS_AT_A_TIME; iK++)
+                {
+                    //TODO - fix this if to deal with very high packet numbers
+                        if( (localStruct[iK].packetNo <  lastSentPacketNo ))
+                        {
+                                noMissing += localStruct[iK].nToFull;
+                                fprintf(stderr,"missing %ld packets\n",localStruct[iK].nToFull);
+                                returnBuffer(&data->fileBuff->udpBuff,localStruct[iK].index,localStruct[iK].order,dataLenOut);
+                                while(fetchEmptyBuffer(&data->fileBuff->udpBuff,&localStruct[iK].data, &localStruct[iK].index));
+                                localStruct[iK].nToFull = packetsPerBlock;
+                                memset(localStruct[iK].data,0,dataLenOut*sizeof(char));
+                                localStruct[iK].order = next_order++;
+                                localStruct[iK].packetNo = nextStructPacketNo;
+                                nextStructPacketNo = (nextStructPacketNo + TIME_INT_PER_BUFFER) & PCKT_NO_MASK;
+                        }
+                }
 
         }
 
