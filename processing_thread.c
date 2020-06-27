@@ -176,7 +176,7 @@ void * worker_work(void * pointer)
                 {
                         if( ((lastSentPacketNo > N_FILE_BUFFERS_AT_A_TIME/2) && (localStruct[iK].packetNo <  lastSentPacketNo ))
                                 ||
-                            ((lastSentPacketNo <= N_FILE_BUFFERS_AT_A_TIME/2) && (localStruct[iK].packetNo > (PCKT_NO_MASK>>1)))    )
+                            ((lastSentPacketNo <= N_FILE_BUFFERS_AT_A_TIME/2) && (localStruct[iK].packetNo > (PCKT_NO_MASK>>1)) && (localStruct[iK].packetNo < (PCKT_NO_MASK + lastSentPacketNo - N_FILE_BUFFERS_AT_A_TIME/2)) )    )
                         {
                                 noMissing += localStruct[iK].nToFull;
                                 fprintf(stderr,"missing %ld packets\n",localStruct[iK].nToFull);
