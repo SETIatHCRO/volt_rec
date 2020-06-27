@@ -31,6 +31,11 @@ void * file_writer_work(void * pointer)
         {
                 continue;
         }
+        if(lastOrd == 0) { //first package
+            snprintf(currFileName,MAX_FILE+20,"%s_%d.%s",data->file_part,consec_file,FILE_EXTENSION);
+            if((file_int = open(currFileName,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
+            if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
+        }
         if (lastOrd+1 != order)
         {
             if (order <= lastOrd)
@@ -39,6 +44,10 @@ void * file_writer_work(void * pointer)
                 //we won't go back. report an error and discard the data
                 fprintf(stderr,"lowest normalized id: %ld; my currend id %ld. Discarding data\n", order, lastOrd);
                 returnEmptyBuffer(&data->fileBuff->udpBuff, indexIn);
+                struct timespec tt;
+                tt.tv_sec = 0;
+                tt.tv_nsec = 100;
+                nanosleep(&tt,NULL);
                 continue;
             }
             //we need to put it back and wait once again for the data, but we increase miss count
@@ -49,8 +58,11 @@ void * file_writer_work(void * pointer)
                 close(file_int);
                 consec_file++;
                 //order should follow packet number 1:1. since we are creating new file
-                //we need to update the packet start information here.
+                //we need to update the packet start information here
                 data->fileBuff->packetStart = order * TIME_INT_PER_BUFFER  + data->fileBuff->packetStart -1;
+                lastOrd = order-1;
+
+                fprintf(stderr, "too many misses, creating new file (%d)\n", consec_file);
                 snprintf(currFileName,MAX_FILE+20,"%s_%d.%s",data->file_part,consec_file,FILE_EXTENSION);
                 if((file_int = open(currFileName,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
                 if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
@@ -69,11 +81,6 @@ void * file_writer_work(void * pointer)
         } else {
             //resseting miss count
             nMisses = 0;
-        }
-        if(lastOrd == 0) { //first package
-            snprintf(currFileName,MAX_FILE+20,"%s_%d.%s",data->file_part,consec_file,FILE_EXTENSION);
-            if((file_int = open(currFileName,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
-            if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
         }
         lastOrd = order;
         printf("writing %ld\n",dataLen);
