@@ -83,7 +83,7 @@ ssize_t findLowest(ssize_t * no, size_t buffLen)
 int fetchEmptyBuffer(udpBuffStruct* structure,char ** buff, ssize_t * index)
 {
         if(pthread_mutex_lock(&structure->dataMutex)) error("lock");
-        *index = findEmpty(structure->orderNo,N_UDP_BUFFERS);
+        *index = findEmpty(structure->orderNo,structure->noBuffers);
         if(*index == -1)
         {
             if(pthread_mutex_unlock(&structure->dataMutex)) error("unlock");
@@ -151,7 +151,7 @@ int fetchBuffer(udpBuffStruct* structure, char **buff, ssize_t * index, ssize_t 
     }
 
     if(pthread_mutex_lock(&structure->dataMutex)) error("lock");
-    *index = findLowest(structure->orderNo,N_UDP_BUFFERS);
+    *index = findLowest(structure->orderNo,structure->noBuffers);
     if(*index == -1)
     {
         if(pthread_mutex_unlock(&structure->dataMutex)) error("unlock");
