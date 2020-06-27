@@ -13,6 +13,7 @@ typedef struct __work_local_struct
 } work_local_struct;
 
 void * worker_work(void * pointer);
+int findStructIndex(work_local_struct * localStruct, int structLen, uint64_t currPacketNo );
 
 
 

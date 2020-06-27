@@ -12,7 +12,7 @@
 #define N_READS_DEFAULT (32*5)
 #define N_UDP_BUFFERS (10)
 #define N_FILE_BUFFERS (20)
-#define N_FILE_BUFFERS_AT_A_TIME (10)
+#define N_FILE_BUFFERS_AT_A_TIME (12)
 //this should be RX_MSG_LEN * N_READS_DEFAULT
 #define UDP_BUFFER_SIZE (100000000)
 //this should be MAX_NO_ANTS * RX_DATA_LEN * MAX_CHANNEL_PACKETS * TIME_INT_PER_BUFFER
@@ -26,7 +26,8 @@
 #define GET_PACKET_REST(x) (x & 0x0f)
 
 #define RX_DATA_LEN (8192)
-#define RX_MSG_LEN (RX_DATA_LEN+8)
+#define RX_BUFF_LEN (8)
+#define RX_MSG_LEN (RX_DATA_LEN+RX_BUFF_LEN)
 
 #define MAX_NO_ANTS (4)
 #define MAX_CHANNEL_PACKETS (32)
@@ -47,11 +48,13 @@
 #define CHAN_NO_MASK (0x0fff)
 #define PCKT_NO_MASK (0x03fffffffff)
 #define VERSION_NO_MASK (0x00ff)
+#define VOLT_VERSION_MASK (0x0080)
 
 #define GET_ANT_NO(x) ((x) & ANT_NO_MASK)
 #define GET_CHAN_NO(x) ((x >> 6) & CHAN_NO_MASK)
 #define GET_PCKT_NO(x) ((x >> 18) & PCKT_NO_MASK)
 #define GET_VERSION_NO(x) ((x >> 56) & VERSION_NO_MASK)
+#define IS_VERSION_VOLT(x) ((x >> 56) & VOLT_VERSION_MASK)
 
 #ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))
