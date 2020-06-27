@@ -31,11 +31,6 @@ void * file_writer_work(void * pointer)
         {
                 continue;
         }
-        if(lastOrd == 0) { //first package
-            snprintf(currFileName,MAX_FILE+20,"%s_%d.%s",data->file_part,consec_file,FILE_EXTENSION);
-            if((file_int = open(currFileName,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
-            if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
-        }
         if (lastOrd+1 != order)
         {
             if (order <= lastOrd)
@@ -52,7 +47,7 @@ void * file_writer_work(void * pointer)
             }
             //we need to put it back and wait once again for the data, but we increase miss count
             nMisses++;
-            if(nMisses > MAX_ORDER_MISSES) {
+            if(lastOrd && ( nMisses > MAX_ORDER_MISSES)) {
                 //starting new file
                 nMisses = 0;
                 close(file_int);
@@ -74,13 +69,18 @@ void * file_writer_work(void * pointer)
                 //and sleeping
                 struct timespec tt;
                 tt.tv_sec = 0;
-                tt.tv_nsec = 100;
+                tt.tv_nsec = 1000;
                 nanosleep(&tt,NULL);
                 continue;
             }
         } else {
             //resseting miss count
             nMisses = 0;
+        }
+        if(lastOrd == 0) { //first package
+            snprintf(currFileName,MAX_FILE+20,"%s_%d.%s",data->file_part,consec_file,FILE_EXTENSION);
+            if((file_int = open(currFileName,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
+            if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
         }
         lastOrd = order;
         printf("writing %ld\n",dataLen);
