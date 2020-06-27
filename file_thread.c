@@ -83,7 +83,7 @@ void * file_writer_work(void * pointer)
             if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
         }
         lastOrd = order;
-        printf("writing %ld\n",dataLen);
+        //printf("writing %ld\n",dataLen);
         if((wcount =  write(file_int,input,dataLen))<dataLen) error("write");
 
         returnEmptyBuffer(&data->fileBuff->udpBuff, indexIn);
