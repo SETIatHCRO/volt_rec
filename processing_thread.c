@@ -59,7 +59,7 @@ void * worker_work(void * pointer)
                     nanosleep(&tt,NULL);
                     continue;
             }
-            memset(&localStruct[iK].data,0,dataLenOut*sizeof(char));
+            memset(localStruct[iK].data,0,dataLenOut*sizeof(char));
             localStruct[iK].nToFull = packetsPerBlock;
             localStruct[iK].order = iK+1;
         }
@@ -91,7 +91,7 @@ void * worker_work(void * pointer)
                         {
                                 //memcpy(&currHeader, input + iK*RX_MSG_LEN, sizeof(uint64_t));
                                 //currHeader = be64toh(currHeader);
-                                currHeader = be64toh( (uint64_t)(*(input + iK*RX_MSG_LEN)));
+                                currHeader = be64toh( *((uint64_t *)(input + iK*RX_MSG_LEN)));
                                 pkt_start = MIN(pkt_start,GET_PCKT_NO(currHeader));
                                 if(updateAntenna(antNumbers, GET_ANT_NO(currHeader), nAnts) == -1)
                                 {
