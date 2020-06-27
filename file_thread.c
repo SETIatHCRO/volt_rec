@@ -54,6 +54,9 @@ void * file_writer_work(void * pointer)
                 consec_file++;
                 snprintf(currFileName,MAX_FILE+20,"%s_%d.%s",data->file_part,consec_file,FILE_EXTENSION);
                 if((file_int = open(currFileName,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
+                //order should follow packet number 1:1. since we are creating new file
+                //we need to update the packet start information here.
+                data->fileBuff->packetStart = order + data->fileBuff->packetStart -1;
                 if(writeHeader(file_int,data->fileBuff)) error("writeHeader");
             }
             else
@@ -90,6 +93,7 @@ int writeHeader(int fd, fileBuffStruct * structure)
     if(write(fd,&structure->nAnts,sizeof(uint32_t))<sizeof(uint32_t)) error("write");
     if(write(fd,structure->antNumbers,sizeof(uint32_t)*structure->nAnts)<(structure->nAnts* sizeof(uint32_t))) error("write");
     if(write(fd,&structure->nchans,sizeof(uint32_t))<sizeof(uint32_t)) error("write");
+    if(write(fd,&structure->firstChan,sizeof(uint32_t))<sizeof(uint32_t)) error("write");
     if(write(fd,&structure->packetStart,sizeof(uint64_t))<sizeof(uint64_t)) error("write");
     return 0;
 }

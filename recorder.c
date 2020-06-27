@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/mman.h>
 
 #include "data_fromats.h"
 #include "udp_thread.h"
@@ -46,9 +47,19 @@ int main(int argc, char *argv[])
 
         int iK;
 
+        if (argc < 2)
+        {
+            printf("usage: %s port datadir nAnts nChans firstChan\n");
+            return -1;
+        }
         if(argc >= 4)
         {
             fileBuff.nAnts = atoi(argv[3]);
+            if ( (fileBuff.nAnts > MAX_NO_ANTS ) ||(fileBuff.nAnts < 1) )
+            {
+                fprintf(stderr,"bad number of antennas, expected 1-%d, got %d\n", MAX_NO_ANTS, fileBuff.nAnts);
+                return -1;
+            }
         }
         else
         {
@@ -57,10 +68,23 @@ int main(int argc, char *argv[])
         if(argc >= 5)
         {
             fileBuff.nchans = atoi(argv[4]);
+            if ( (fileBuff.nchans >MAX_CHANNEL_PACKETS ) ||(fileBuff.nchans < 1) )
+            {
+                fprintf(stderr,"bad number of channels, expected 1-%d, got %d\n", MAX_CHANNEL_PACKETS, fileBuff.nchans);
+                return -1;
+            }
         }
         else
         {
-            fileBuff.nchans = 32;
+            fileBuff.nchans = MAX_CHANNEL_PACKETS;
+        }
+        if(argc >= 6)
+        {
+            fileBuff.firstChan = atoi(argv[5]);
+        }
+        else
+        {
+            fileBuff.firstChan = 0;
         }
 
         if (argc >= 3)
@@ -80,15 +104,8 @@ int main(int argc, char *argv[])
             udpStr.port = DEFAULT_PORT;
         }
 
-        printf("%s starting\n"
-               "port %d\n"
-               "file %s_X.%s"
-               "time: start (%ld) stop (%ld) current (%ld)\n",
-               argv[0],udpStr.port,fileStr.file_part,FILE_EXTENSION, udpStr.startTime,udpStr.stopTime,time(NULL));
-
-
         init_udpBuff(&udpBuff, N_UDP_BUFFERS, UDP_BUFFER_SIZE);
-        init_udpBuff(&fileBuff.udpBuff, N_UDP_BUFFERS, UDP_BUFFER_SIZE);
+        init_udpBuff(&fileBuff.udpBuff, N_FILE_BUFFERS, FILE_BUFFER_SIZE);
 /*
         if(pthread_mutex_init(&udpBuff.dataMutex,NULL)) error("mutexI");
         if(pthread_mutex_init(&udpBuff.NReadyMutex,NULL)) error("mutexI");
@@ -128,6 +145,9 @@ int main(int argc, char *argv[])
         sigaddset(&mask, SIGINT);
         pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
+        mlockall(MCL_CURRENT);
+
+
         if (pthread_create(&udpRcv, NULL, udp_recv_work, (void *)&udpStr)) error ("recv Create");
         if (pthread_create(&fileWriter, NULL, file_writer_work, (void *)&fileStr)) error ("recv Create");
         if (pthread_create(&worker, NULL, worker_work, (void *)&procStr)) error ("recv Create");
@@ -145,6 +165,8 @@ int main(int argc, char *argv[])
         if(pthread_join(udpRcv,NULL)) error("join");
         if(pthread_join(fileWriter,NULL)) error("join");
         if(pthread_join(worker,NULL)) error("join");
+
+        munlockall();
 
         destroy_udpBuff(&udpBuff);
         destroy_udpBuff(&fileBuff.udpBuff);
