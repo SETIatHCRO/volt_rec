@@ -27,3 +27,4 @@ described in detail in separate README
 
 Software written in hashpipe, designed to use ibverbs packet capture (ibverbs_pkt_thread from hpguppi) and hashpipe transfer. The software is still doing sorting/processing and file writing in the format as full custom. It is intended as an intermediate step to rawspec file format writer/converter
 
+requires properly compiled and installed hpguppi_daq, branch meerkat-multi-qp-branch (as of end July 2020)

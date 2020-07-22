@@ -107,6 +107,7 @@ void * worker_work(void * pointer)
                                 }
                                 //printf("Ant: %ld chan: %ld pkt: %ld version: %ld\n",GET_ANT_NO(currHeader),GET_CHAN_NO(currHeader),GET_PCKT_NO(currHeader),GET_VERSION_NO(currHeader));
                         }
+			//kill(0,SIGKILL);
                         pkt_start = GET_PACKET_FILTER(pkt_start);
                         data->fileBuff->packetStart = pkt_start;
                         for(iK = 0; iK < N_FILE_BUFFERS_AT_A_TIME; iK++)
@@ -127,6 +128,7 @@ void * worker_work(void * pointer)
                         currPacketRest = GET_PACKET_REST( GET_PCKT_NO(currHeader) );
                         currAntId = getAntIndex(antNumbers, GET_ANT_NO(currHeader), nAnts);
                         currChanNo = (GET_CHAN_NO(currHeader) - firstChan)/CHANS_PER_PACKET;
+			//printf("currchan:%d %d || ",currChanNo, nchans);
                         if( IS_VERSION_VOLT(currHeader) && (currAntId != -1) && (currAntId < MAX_NO_ANTS) && (currChanNo >= 0) && (currChanNo < nchans) )
                         {
                             //we work wit the assumption that there are no 2 packets with the same header

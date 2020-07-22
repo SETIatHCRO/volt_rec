@@ -84,6 +84,7 @@ void * file_writer_work(void * pointer)
         }
         lastOrd = order;
         //printf("writing %ld\n",dataLen);
+        printf(".");
         if((wcount =  write(file_int,input,dataLen))<dataLen) error("write");
 
         returnEmptyBuffer(&data->fileBuff->udpBuff, indexIn);
