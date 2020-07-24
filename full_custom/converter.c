@@ -37,6 +37,23 @@ int convert(char * datain,char * dataout[MAX_NO_ANTS], uint32_t nAnts, uint32_t 
 	return 0;
 }
 
+#define MY_BUFFER_SIZE 4096
+int write_ext_header(int out_fd, int in_fd)
+{
+	char buf[MY_BUFFER_SIZE];
+	ssize_t rcnt;
+
+	while((rcnt=read(in_fd,buf,MY_BUFFER_SIZE)) > 0)
+	{
+		if (rcnt == -1)
+		{
+			error("read header");
+		}
+		if(write(out_fd,buf,rcnt) != rcnt) error("text write");
+	}
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	char * fname;
@@ -56,12 +73,18 @@ int main(int argc, char *argv[])
 	ssize_t inBufferLen, outBufferLen;
 	int txt_fd;
 	char txtline[MY_LINE_SIZE];
-	int is_ok =1;
+	int is_ok =1, add_header = 0;
+	int header_fd;
 
-	if (argc != 2)
+	if ((argc != 2) && (argc != 3))
 	{
-		printf("usage: %s filename\n",argv[0]);
+		printf("usage: %s filename [headerfile]\n",argv[0]);
 		return 1;
+	}
+	if(argc == 3)
+	{
+		add_header = 1;
+		if((header_fd = open(argv[2],O_RDONLY)) < 0) error("open");
 	}
 	fname = argv[1];
 	namelen = strlen(fname);
@@ -121,13 +144,22 @@ int main(int argc, char *argv[])
 
 		snprintf(fnameOutTmp,PATH_MAX,"%s_ant%u.bin",fnamePart,antIDs[iK]);
 		if((out_fds[iK] = open(fnameOutTmp,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
+		if(add_header)
+		{
+			write_ext_header(out_fds[iK],header_fd);
+		}
+	}
 
-	}	
+	if(add_header)
+	{
+		close(header_fd);
+	}
 
 	while(is_ok)
 	{
 		if(read(in_fd,datain,inBufferLen) < inBufferLen)
 		{
+			perror("read");
 			is_ok = 0;
 			break;
 		}
@@ -142,8 +174,10 @@ int main(int argc, char *argv[])
 	for (iK = 0; iK < nAnts; ++iK)
 	{
 		close(out_fds[iK]);
+		free(dataout[iK]);
 	}
 	close(in_fd);
+	free(datain);
 
 	return 0;
 

@@ -34,16 +34,16 @@ def main():
 
     data = data.reshape(-1, args.nchans, NPOL)
 
-    #fig, (ax1, ax2) = plt.subplots(1, sharex=True, sharey=True)
-    fig, (ax1) = plt.subplots(1, sharex=True, sharey=True)
+    fig, (ax1, ax2) = plt.subplots(1, sharex=True, sharey=True)
+    #fig, (ax1) = plt.subplots(1, sharex=True, sharey=True)
     ax1.set_title("X-pol")
     ax1.set_ylabel("Freq chan")
     ax1.imshow(np.abs(data[:,:,0]).T, interpolation='nearest', aspect='auto')
 
-    #ax2.set_title("Y-pol")
-    #ax2.imshow(np.abs(data[:,:,1]).T, interpolation='nearest', aspect='auto')
-    #ax2.set_ylabel("Freq chan")
-    #ax2.set_xlabel("Time (samples)")
+    ax2.set_title("Y-pol")
+    ax2.imshow(np.abs(data[:,:,1]).T, interpolation='nearest', aspect='auto')
+    ax2.set_ylabel("Freq chan")
+    ax2.set_xlabel("Time (samples)")
 
     plt.figure()
     plt.title("Bandpass")

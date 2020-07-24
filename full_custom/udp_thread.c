@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 
 extern volatile sig_atomic_t keep_going;
 
