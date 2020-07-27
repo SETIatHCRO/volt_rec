@@ -22,19 +22,34 @@ def main():
             help = 'number of samples to read', type=int)
     parser.add_argument('-o', dest='offset', default = 0,
             help = 'sampleOffset', type=int)
+    parser.add_argument('-b', dest='nbit', default = 4,
+            help = 'nbits in file', type=int)
+    parser.add_argument('-s', dest='hdr_sze', default=16384,
+            help = 'number of bytes to skip as header')
 
     args = parser.parse_args()
 
     # found this
     # https://stackoverflow.com/questions/26369520/how-to-load-4-bit-data-into-numpy-array
-    data = np.fromfile(args.in_file, dtype=np.int8, 
-            count=args.nchans*args.nsamps*NPOL, offset=args.offset*args.nchans*NPOL)
-    data = (data << 4 >> 4)  +\
-            1j*(data >> 4)
+    if args.nbit == 4:
+        data = np.fromfile(args.in_file, dtype=np.int8, 
+                count=args.nchans*args.nsamps*NPOL, 
+                offset=args.offset*args.nchans*NPOL + args.hdr_sze)
+        data = (data << 4 >> 4)  +\
+                1j*(data >> 4)
+
+    elif args.nbit == 8:
+        data = np.fromfile(args.in_file, dtype=np.int8,
+                count=args.nchans*args.nsamps*NPOL*2,
+                offset=args.offset*args.nchans*NPOL*2 + args.hdr_sze)
+        data = data[::2] + 1j*data[1::2]
+
+    else:
+        raise RuntimeError("Can only support 4 or 8 bit input")
 
     data = data.reshape(-1, args.nchans, NPOL)
 
-    fig, (ax1, ax2) = plt.subplots(1, sharex=True, sharey=True)
+    fig, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
     #fig, (ax1) = plt.subplots(1, sharex=True, sharey=True)
     ax1.set_title("X-pol")
     ax1.set_ylabel("Freq chan")

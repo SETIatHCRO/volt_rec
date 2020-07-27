@@ -16,21 +16,52 @@
 #error bad data size!
 #endif
 
+#ifndef MY_DO_EIGHTBITS
+#define BITS_MULTIPLAYER 1
+#define BITS_NAME_STRING "4b"
+#else
+#define BITS_MULTIPLAYER 2
+#define BITS_NAME_STRING "8b"
+#endif
+
+
 //SAMPLES_PER_PACKET POLS_PER_PACKET CHANS_PER_PACKET
 int convert(char * datain,char * dataout[MAX_NO_ANTS], uint32_t nAnts, uint32_t nChanpkts)
 {
 	int iK, iL, iM;
+#ifdef MY_DO_EIGHTBITS
+	int iN;
+	int8_t datare;
+	int8_t dataim;
+	int8_t currsample;
+	ssize_t indexin, indexout;
+#endif
 	for (iK = 0; iK<nAnts;++iK)
 	{
 		for (iL = 0; iL < nChanpkts; ++iL)
 		{
 			for(iM = 0; iM < SAMPLES_PER_PACKET; ++iM)
 			{
+#ifndef MY_DO_EIGHTBITS
 				memcpy(
 				        dataout[iK] + iL*POLS_PER_PACKET * CHANS_PER_PACKET + iM*nChanpkts*POLS_PER_PACKET * CHANS_PER_PACKET,
 				        datain + iK*(RX_DATA_LEN*nChanpkts) + iL*RX_DATA_LEN + iM * POLS_PER_PACKET * CHANS_PER_PACKET,
 					sizeof(char) * CHANS_PER_PACKET * POLS_PER_PACKET
 				      );
+#else
+				for (iN = 0; iN < CHANS_PER_PACKET * POLS_PER_PACKET; ++iN)
+				{
+					indexin = iK*(RX_DATA_LEN*nChanpkts) + iL*RX_DATA_LEN + iM * POLS_PER_PACKET * CHANS_PER_PACKET + iN;
+					indexout = 2*(iL*POLS_PER_PACKET * CHANS_PER_PACKET + iM*nChanpkts*POLS_PER_PACKET * CHANS_PER_PACKET + iN);
+					currsample = datain[indexin];
+					datare = (currsample >>4);
+					dataim = (currsample & 0x0f);
+					datare = ((datare & 0x08) ? (datare | 0xf0): (datare));
+					dataim = ((dataim & 0x08) ? (dataim | 0xf0): (dataim));
+					dataout[iK][indexout] = datare;
+					dataout[iK][indexout+1] = dataim;
+				}
+#endif
 			}
 		}
 	}
@@ -119,7 +150,7 @@ int main(int argc, char *argv[])
 
 	//calculating buffer size
 	inBufferLen = RX_DATA_LEN*sizeof(char)*nAnts*nChanpkts;
-	outBufferLen = RX_DATA_LEN*sizeof(char)*nChanpkts;
+	outBufferLen = RX_DATA_LEN*sizeof(char)*nChanpkts*BITS_MULTIPLAYER;
 
 	//alocating input buffer
 	if(( datain = (char *) malloc (inBufferLen)) == NULL) error("malloc");
@@ -128,7 +159,7 @@ int main(int argc, char *argv[])
 		//for each antenna, we are alocating data, generating file name, opening data file, opening text file and dumping header
 		if ((dataout[iK] = (char *) malloc(outBufferLen)) == NULL) error("malloc");
 
-		snprintf(fnameOutTextTmp,PATH_MAX,"%s_ant%u.txt",fnamePart,antIDs[iK]);
+		snprintf(fnameOutTextTmp,PATH_MAX,"%s_%s_ant%u.txt",fnamePart,BITS_NAME_STRING,antIDs[iK]);
 		if((txt_fd = open(fnameOutTextTmp,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
 
 		snprintf(txtline,MY_LINE_SIZE,"antenna: %u\n",antIDs[iK]);
@@ -142,7 +173,7 @@ int main(int argc, char *argv[])
 
 		close(txt_fd);
 
-		snprintf(fnameOutTmp,PATH_MAX,"%s_ant%u.bin",fnamePart,antIDs[iK]);
+		snprintf(fnameOutTmp,PATH_MAX,"%s_%s_ant%u.bin",fnamePart,BITS_NAME_STRING,antIDs[iK]);
 		if((out_fds[iK] = open(fnameOutTmp,O_CREAT|O_WRONLY|O_TRUNC|S_IWUSR|S_IRUSR,0644)) < 0) error("open");
 		if(add_header)
 		{

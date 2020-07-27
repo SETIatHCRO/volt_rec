@@ -1,6 +1,6 @@
 CFLAGS= -Wall -g -pthread
 
-all: recorder converter
+all: recorder converter converter_8b
 default: recorder
 
 common.o: common.c common.h data_formats.h
@@ -21,7 +21,10 @@ recorder: recorder.c file_thread.o processing_thread.o udp_thread.o common.o
 converter: converter.c data_formats.h common.o
 	gcc $(CFLAGS) $< common.o -o $@ 
 
+converter_8b: converter.c data_formats.h common.o
+	gcc $(CFLAGS) $< common.o -o $@ -DMY_DO_EIGHTBITS 
+
 clean:
-	rm *.o recorder converter
+	rm *.o recorder converter converter_8b
 
 .PHONY: clean
