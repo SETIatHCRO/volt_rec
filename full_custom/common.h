@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "data_fromats.h"
+#include "data_formats.h"
 
 void error(char *message);
 ssize_t findEmpty(ssize_t * no, size_t buffLen);

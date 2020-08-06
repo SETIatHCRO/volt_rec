@@ -1,5 +1,5 @@
 #include "processing_thread.h"
-#include "data_fromats.h"
+#include "data_formats.h"
 #include "common.h"
 #include <stdlib.h>
 #include <signal.h>

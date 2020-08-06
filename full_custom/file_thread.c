@@ -1,5 +1,5 @@
 #include "file_thread.h"
-#include "data_fromats.h"
+#include "data_formats.h"
 #include "common.h"
 #include <stdlib.h>
 #include <signal.h>
@@ -69,7 +69,7 @@ void * file_writer_work(void * pointer)
                 //and sleeping
                 struct timespec tt;
                 tt.tv_sec = 0;
-                tt.tv_nsec = 1000;
+                tt.tv_nsec = 100;
                 nanosleep(&tt,NULL);
                 continue;
             }
@@ -84,7 +84,7 @@ void * file_writer_work(void * pointer)
         }
         lastOrd = order;
         //printf("writing %ld\n",dataLen);
-        printf(".");
+        //printf(".");
         if((wcount =  write(file_int,input,dataLen))<dataLen) error("write");
 
         returnEmptyBuffer(&data->fileBuff->udpBuff, indexIn);

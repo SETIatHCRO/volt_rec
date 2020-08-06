@@ -1,5 +1,5 @@
 #include "udp_thread.h"
-#include "data_fromats.h"
+#include "data_formats.h"
 #include "common.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 
 extern volatile sig_atomic_t keep_going;
 

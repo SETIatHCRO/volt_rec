@@ -8,13 +8,13 @@
 #include <time.h>
 #include <sys/mman.h>
 
-#include "data_fromats.h"
+#include "data_formats.h"
 #include "udp_thread.h"
 #include "processing_thread.h"
 #include "file_thread.h"
 #include "common.h"
 
-volatile sig_atomic_t keep_going = 1;
+extern volatile sig_atomic_t keep_going;
 
 
 void inthandler (int sig)

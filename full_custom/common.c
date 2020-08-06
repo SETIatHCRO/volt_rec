@@ -7,7 +7,7 @@
 #include <time.h>
 #include <string.h>
 
-extern volatile sig_atomic_t keep_going;
+volatile sig_atomic_t keep_going=1;
 
 void error(char *message)
 {

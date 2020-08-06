@@ -12,18 +12,18 @@
 #define N_READS_DEFAULT (32*5)
 #define N_UDP_BUFFERS (10)
 #define N_FILE_BUFFERS (20)
-#define N_FILE_BUFFERS_AT_A_TIME (12)
+#define N_FILE_BUFFERS_AT_A_TIME (6)
 //this should be RX_MSG_LEN * N_READS_DEFAULT
-#define UDP_BUFFER_SIZE (100000000)
+#define UDP_BUFFER_SIZE (1000000000)
 //this should be MAX_NO_ANTS * RX_DATA_LEN * MAX_CHANNEL_PACKETS * TIME_INT_PER_BUFFER
-#define FILE_BUFFER_SIZE (100000000)
+#define FILE_BUFFER_SIZE (1000000000)
 
-#define MAX_ORDER_MISSES (9)
+#define MAX_ORDER_MISSES (200)
 
 //should be 2^n
-#define TIME_INT_PER_BUFFER 16
-#define GET_PACKET_FILTER(x) (x & ~(0x0f))
-#define GET_PACKET_REST(x) (x & 0x0f)
+#define TIME_INT_PER_BUFFER 128
+#define GET_PACKET_FILTER(x) (x & ~(0x07f))
+#define GET_PACKET_REST(x) (x & 0x07f)
 
 #define RX_DATA_LEN (8192)
 #define RX_BUFF_LEN (8)
